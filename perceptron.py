@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 
 class Perceptron():
-    def __init__(self, input_size, lr=1, epochs=100):
+    def __init__(self, input_size, lr=1, epochs=300):
         self.W = np.zeros(input_size+1)
         self.epochs = epochs
         self.lr = lr
@@ -18,13 +18,17 @@ class Perceptron():
         a = self.activation_fn(z)
         return a
 
+    def lrate(self, it):
+        return self.lr - (it/self.epochs)
+
     def fit(self, X, d):
-        for _ in range(self.epochs):
+        for it in range(self.epochs):
+            lrate = self.lrate(it)
             for i in range(d.shape[0]):
                 x = np.insert(X[i], 0, -1)
                 y = self.predict(x)
                 e = d[i] - y
-                self.W = self.W + self.lr * e * x
+                self.W = self.W + lrate * e * x
             self.histW.append(self.W)
         self.histW = np.array(self.histW)
 
@@ -32,7 +36,7 @@ if __name__ == '__main__':
     ### Training set
     train_set = pd.DataFrame(np.random.rand(1000, 2)*100, columns=['x', 'y'])
     train_set['color'] = 1
-    train_set.loc[train_set.y - 1.8*train_set.x > -6, 'color'] = 0
+    train_set.loc[train_set.y - 1.8*train_set.x > -35, 'color'] = 0
     X = train_set[['x','y']].to_numpy()
     d = train_set.color.to_numpy()
     
@@ -72,8 +76,8 @@ if __name__ == '__main__':
         return line_plt,
 
     # call the animator.  blit=True means only re-draw the parts that have changed.
-    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=perceptron.histW.shape[0], interval=35, blit=True, repeat=False)
-    
+    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=perceptron.histW.shape[0], interval=1, blit=True, repeat=False)
+   
     ###############################################################
     ####################### END ANIMATION #########################
     ###############################################################    
